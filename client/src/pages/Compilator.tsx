@@ -35,6 +35,34 @@ function Compilator() {
         }
     }
 
+    const saveCompiledPdf = async () => {
+        setLoading(true)
+        try {
+            const res = await fetch('http://localhost:3001/api/compilator/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ urls }),
+            })
+
+            const json = await res.json()
+            if (res.ok) {
+                console.log('PDF saved in database with ID:', json.id)
+                alert('PDF successfully saved!')
+            } else {
+                console.error('Failed to save PDF:', json.error)
+                alert('Failed to save PDF')
+            }
+        } catch (error) {
+            console.error('Error during save:', error)
+            alert('Unexpected error while saving PDF')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+
     return (
         <div className="compilator-container">
             <h1 className="compilator-title">Download</h1>
@@ -47,6 +75,9 @@ function Compilator() {
             />
             <button className="compilator-button" onClick={downLoadCompiledPdf}>
                 Submit
+            </button>
+            <button className="compilator-button" onClick={saveCompiledPdf}>
+                Save PDF
             </button>
 
             {loading && (
