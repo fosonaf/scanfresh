@@ -1,7 +1,4 @@
 .compilator-container {
-    position: relative;
-    display: flex;
-    flex-direction: column;
     gap: 1rem;
     text-align: center;
 
@@ -15,8 +12,7 @@
     margin-bottom: 0.5rem;
 }
 
-.compilator-textarea {
-    width: 100%;
+.compilator-text-input {
     padding: 1rem;
     font-size: 1rem;
     background-color: #2a2a2a;
@@ -24,6 +20,14 @@
     border: none;
     resize: vertical;
     margin-top: 10px;
+}
+
+.compilator-input {
+    width: 25%;
+}
+
+.compilator-textarea {
+    width: 100%;
 }
 
 .compilator-button {

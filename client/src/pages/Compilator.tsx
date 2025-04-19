@@ -60,14 +60,14 @@ function Compilator() {
         <div className="compilator-container">
             <h1 className="compilator-title">Download</h1>
             <input
-                className="compilator-input"
+                className="compilator-text-input compilator-input"
                 type="text"
                 placeholder="Enter PDF title..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
             />
             <textarea
-                className="compilator-textarea"
+                className="compilator-text-input compilator-textarea"
                 placeholder="Paste your list of URLs here..."
                 rows={10}
                 value={urls}
