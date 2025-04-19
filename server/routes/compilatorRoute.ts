@@ -18,28 +18,22 @@ router.post('/compile', async (req, res) => {
     }
 
     try {
-        // Préparer la liste des URLs
         const urlsList: string[] = urls
             .split('\n')
             .map((u: string) => u.trim())
             .filter(Boolean)
 
-        // Créer un chemin temporaire pour le fichier PDF
         const tempDir = os.tmpdir()
         const outputPdfPath = path.join(tempDir, `result_${Date.now()}.pdf`)
 
-        // Vérification du chemin du script Python
         const scriptPath = path.resolve(__dirname, '../scripts/dl_pdf.py')
         console.log('Python script path:', scriptPath)
 
-        // Formatage correct des arguments pour python
         const urlsArg = JSON.stringify(urlsList) // JSON.stringify pour envoyer un tableau JSON comme argument
         console.log('URLs to pass to Python:', urlsArg)
 
-        // Appel du script Python avec les arguments correctement formatés
         const python = spawn('python', [scriptPath, urlsArg, outputPdfPath])
 
-        // Log des erreurs de stderr
         python.stderr.on('data', (data) => {
             console.error(`stderr: ${data.toString()}`)
         })
@@ -49,7 +43,6 @@ router.post('/compile', async (req, res) => {
             console.log(`stdout: ${data.toString()}`)
         })
 
-        // Lors de la fermeture du processus Python
         python.on('close', (code) => {
             if (code !== 0) {
                 console.error(`Python script failed with exit code ${code}`)
@@ -58,7 +51,6 @@ router.post('/compile', async (req, res) => {
 
             console.log('PDF generated, sending file...')
 
-            // Envoi du fichier PDF généré
             res.download(outputPdfPath, 'result.pdf', (err) => {
                 if (err) {
                     console.error('Error sending PDF:', err)

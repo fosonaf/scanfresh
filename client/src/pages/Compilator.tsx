@@ -6,10 +6,13 @@ function Compilator() {
     const [urls, setUrls] = useState('')
     const [loading, setLoading] = useState(false)
 
-    const downLoadCompiledPdf = async () => {
+    const postAndHandle = async (
+        endpoint: string,
+        onSuccess: (res: Response) => Promise<void>
+    ) => {
         setLoading(true)
         try {
-            const res = await fetch('http://localhost:3001/api/compilator/compile', {
+            const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -18,50 +21,39 @@ function Compilator() {
             })
 
             if (res.ok) {
-                const blob = await res.blob()
-                const url = window.URL.createObjectURL(blob)
-                const a = document.createElement('a')
-                a.href = url
-                a.download = 'result.pdf'
-                a.click()
-                window.URL.revokeObjectURL(url)
+                await onSuccess(res)
             } else {
-                console.error('Failed to fetch the PDF')
+                const json = await res.json()
+                console.error('Error from API:', json.error)
+                alert('Operation failed')
             }
         } catch (error) {
-            console.error('Error during fetch:', error)
+            console.error('Network or server error:', error)
+            alert('Unexpected error')
         } finally {
             setLoading(false)
         }
     }
 
-    const saveCompiledPdf = async () => {
-        setLoading(true)
-        try {
-            const res = await fetch('http://localhost:3001/api/compilator/save', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ urls }),
-            })
+    const downLoadCompiledPdf = () => {
+        postAndHandle('http://localhost:3001/api/compilator/compile', async (res) => {
+            const blob = await res.blob()
+            const url = window.URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = 'result.pdf'
+            a.click()
+            window.URL.revokeObjectURL(url)
+        })
+    }
 
+    const saveCompiledPdf = () => {
+        postAndHandle('http://localhost:3001/api/compilator/save', async (res) => {
             const json = await res.json()
-            if (res.ok) {
-                console.log('PDF saved in database with ID:', json.id)
-                alert('PDF successfully saved!')
-            } else {
-                console.error('Failed to save PDF:', json.error)
-                alert('Failed to save PDF')
-            }
-        } catch (error) {
-            console.error('Error during save:', error)
-            alert('Unexpected error while saving PDF')
-        } finally {
-            setLoading(false)
-        }
+            console.log('PDF saved in DB with ID:', json.id)
+            alert('PDF successfully saved!')
+        })
     }
-
 
     return (
         <div className="compilator-container">
