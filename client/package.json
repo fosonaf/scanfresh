@@ -14,7 +14,8 @@
     "@tailwindcss/vite": "^4.1.4",
     "child_process": "^1.0.2",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-loader-spinner": "^6.1.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
