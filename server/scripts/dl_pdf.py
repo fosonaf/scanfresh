@@ -1,4 +1,5 @@
 import os
+import sys
 import requests
 import io
 from PIL import Image
@@ -6,53 +7,81 @@ from fpdf import FPDF
 from bs4 import BeautifulSoup
 import imghdr
 import tempfile
+import json
 
 def extract_images_from_html(html_content):
+    print("Extracting images from HTML...")
     soup = BeautifulSoup(html_content, 'html.parser')
     images = []
     for img_tag in soup.find_all('img'):
         src = img_tag.get('src')
         if src:
             images.append(src)
+    print(f"Found {len(images)} images.")
     return images
 
-def download_images_from_urls(urls: list[str], output_path: str):
+def download_images_from_urls(urls, output_path):
+    print(f"Starting to download images for {len(urls)} URLs...")
+
     pdf = FPDF()
 
     for url in urls:
         url = url.strip()
-        if not url:
-            continue
-
+        print(f"Processing URL: {url}")
         try:
-            response = requests.get(url, timeout=10)
-            response.raise_for_status()
-        except Exception as e:
-            print(f"Failed to fetch {url}: {e}")
-            continue
+            response = requests.get(url)
+            if response.status_code == 200:
+                print(f"Successfully fetched HTML content for {url}")
+                html_content = response.text
+                images = extract_images_from_html(html_content)
+                for image_url in images:
+                    try:
+                        print(f"Downloading image from {image_url}")
+                        image_response = requests.get(image_url)
+                        if image_response.status_code == 200:
+                            image_data = image_response.content
+                            if imghdr.what(None, h=image_data) is not None:
+                                with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_image_file:
+                                    temp_image_file.write(image_data)
+                                print(f"Image saved temporarily to {temp_image_file.name}")
+                                image = Image.open(temp_image_file.name)
+                                jpeg_path = temp_image_file.name.replace('.png', '.jpg')
+                                image = image.convert('RGB')
+                                image.save(jpeg_path, 'JPEG')
+                                print(f"Converted image saved to {jpeg_path}")
+                                pdf.add_page()
+                                pdf.image(jpeg_path, 10, 10, 190, 277)
+                                image.close()
+                                os.unlink(temp_image_file.name)
+                                os.unlink(jpeg_path)
+                            else:
+                                print(f"Invalid image format: {image_url}")
+                        else:
+                            print(f"Failed to download image from {image_url}, status code: {image_response.status_code}")
+                    except Exception as img_err:
+                        print(f"Error downloading image: {image_url} => {img_err}")
+            else:
+                print(f"Failed to load page {url}, status code: {response.status_code}")
+        except Exception as page_err:
+            print(f"Error loading page: {url} => {page_err}")
 
-        html_content = response.text
-        images = extract_images_from_html(html_content)
-
-        for image_url in images:
-            try:
-                image_response = requests.get(image_url, timeout=10)
-                image_response.raise_for_status()
-                image_data = image_response.content
-                if imghdr.what(None, h=image_data):
-                    with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_image_file:
-                        temp_image_file.write(image_data)
-                    image = Image.open(temp_image_file.name).convert('RGB')
-                    jpeg_path = temp_image_file.name.replace('.png', '.jpg')
-                    image.save(jpeg_path, 'JPEG')
-                    pdf.add_page()
-                    pdf.image(jpeg_path, 10, 10, 190, 277)
-                    image.close()
-                    os.unlink(temp_image_file.name)
-                    os.unlink(jpeg_path)
-            except Exception as e:
-                print(f"Error processing image {image_url}: {e}")
-                continue
-
+    print(f"Saving PDF to {output_path}...")
     pdf.output(output_path)
-    return output_path
+    print(f"PDF saved successfully to {output_path}")
+
+if __name__ == "__main__":
+    print(f"Starting script {sys.argv[0]}...")
+
+    if len(sys.argv) != 3:
+        print("Usage: dl_pdf.py '[\"url1\", \"url2\"]' output_path")
+        sys.exit(1)
+
+    try:
+        urls = json.loads(sys.argv[1])
+        output_path = sys.argv[2]
+        print(f"Parsed URLs: {urls}")
+        print(f"Output PDF path: {output_path}")
+        download_images_from_urls(urls, output_path)
+    except Exception as e:
+        print(f"An error occurred: {e}", file=sys.stderr)  # Capture l'erreur détaillée
+        sys.exit(1)

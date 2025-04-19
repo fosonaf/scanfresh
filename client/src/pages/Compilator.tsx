@@ -4,7 +4,7 @@ import '../styles/compilator.css'
 function Compilator() {
     const [urls, setUrls] = useState('')
 
-    const sendLogs = async () => {
+    const downLoadCompiledPdf = async () => {
         const res = await fetch('http://localhost:3001/api/compilator/compile', {
             method: 'POST',
             headers: {
@@ -13,8 +13,15 @@ function Compilator() {
             body: JSON.stringify({ urls }),
         })
 
-        const data = await res.json()
-        console.log('Response:', data)
+        if (res.ok) {
+            const blob = await res.blob()
+            const url = window.URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = 'result.pdf'
+            a.click()
+            window.URL.revokeObjectURL(url)
+        }
     }
 
     return (
@@ -27,7 +34,7 @@ function Compilator() {
                 value={urls}
                 onChange={(e) => setUrls(e.target.value)}
             />
-            <button className="compilator-button" onClick={sendLogs}>
+            <button className="compilator-button" onClick={downLoadCompiledPdf}>
                 Submit
             </button>
         </div>
