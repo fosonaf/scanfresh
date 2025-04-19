@@ -1,6 +1,8 @@
+import '../styles/compilator.css'
+
 function Compilator() {
-    const handleTest = async () => {
-        const res = await fetch('http://localhost:3001/api/test')
+    const sendLogs = async () => {
+        const res = await fetch('http://localhost:3001/api/log-compilator')
         const data = await res.json()
         console.log('Response:', data)
     }
@@ -15,7 +17,7 @@ function Compilator() {
             ></textarea>
             <button
                 className="compilator-button"
-                onClick={handleTest}
+                onClick={sendLogs}
             >Submit</button>
         </div>
     )

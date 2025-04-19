@@ -1,28 +1,9 @@
-/* Layout.css */
 .layout {
     display: flex;
     height: 100vh;
     font-family: Arial, sans-serif;
     background-color: #1e1e1e;
     color: #ffa500;
-}
-
-.sidebar {
-    width: 200px;
-    background-color: #2a2a2a;
-    padding: 1rem;
-    box-sizing: border-box;
-}
-
-.sidebar a {
-    display: block;
-    color: #ffa500;
-    text-decoration: none;
-    margin-bottom: 1rem;
-}
-
-.sidebar a:hover {
-    text-decoration: underline;
 }
 
 .main-content {

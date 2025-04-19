@@ -1,16 +1,14 @@
-// src/App.tsx
 import { Routes, Route } from 'react-router-dom';
-import Layout from './components/Layout'; // Import du composant Layout
-import Home from './pages/Home'; // Page d'accueil
-import Compilator from './pages/Compilator'; // Page du compilateur
+import Layout from './components/Layout';
+import Home from './pages/Home';
+import Compilator from './pages/Compilator';
 
 function App() {
     return (
         <Routes>
-            {/* Définition de la route principale avec le Layout */}
             <Route path="/" element={<Layout />}>
-                <Route index element={<Home />} /> {/* Accueil */}
-                <Route path="compilateur" element={<Compilator />} /> {/* Compilateur */}
+                <Route index element={<Home />} />
+                <Route path="compilator" element={<Compilator />} />
             </Route>
         </Routes>
     );

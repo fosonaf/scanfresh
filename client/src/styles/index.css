@@ -1,0 +1,29 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #1e1e1e;
+    color: #fbbf24;
+}
+
+.dark {
+    background-color: #121212;
+    color: #fbbf24;
+}
+
+button {
+    background-color: #fbbf24;
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #f59e0b;
+}
+

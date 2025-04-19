@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
         const db = client.db(dbName)
         const collection = db.collection('tester')
 
-        const message = `Hello ${new Date().toISOString()}`
+        const message = `Get urls ${new Date().toISOString()}`
         const result = await collection.insertOne({ message })
 
         res.json({ success: true, insertedId: result.insertedId })
