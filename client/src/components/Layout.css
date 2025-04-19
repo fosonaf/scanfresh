@@ -1,13 +1,14 @@
 .layout {
     display: flex;
-    height: 100vh;
+    height: 100%;
     font-family: Arial, sans-serif;
     background-color: #1e1e1e;
     color: #ffa500;
 }
 
 .main-content {
-    flex-grow: 1;
-    padding: 2rem;
-    box-sizing: border-box;
+    flex-grow: 1; /* La main-container prend l'espace restant */
+    padding: 20px;
+    overflow-y: auto; /* Ajoute un scroll vertical */
+    height: 100vh;
 }

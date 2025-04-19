@@ -1,5 +1,6 @@
 .sidebar {
     width: 20%;
+    height: 100%;
     transition: width 0.3s ease;
     overflow: hidden;
     background-color: #2a2a2a;
