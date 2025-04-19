@@ -5,6 +5,7 @@ import '../styles/compilator.css'
 function Compilator() {
     const [urls, setUrls] = useState('')
     const [loading, setLoading] = useState(false)
+    const [title, setTitle] = useState('')
 
     const postAndHandle = async (
         endpoint: string,
@@ -17,7 +18,7 @@ function Compilator() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ urls }),
+                body: JSON.stringify({ urls, title }),
             })
 
             if (res.ok) {
@@ -58,6 +59,13 @@ function Compilator() {
     return (
         <div className="compilator-container">
             <h1 className="compilator-title">Download</h1>
+            <input
+                className="compilator-input"
+                type="text"
+                placeholder="Enter PDF title..."
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+            />
             <textarea
                 className="compilator-textarea"
                 placeholder="Paste your list of URLs here..."
@@ -69,9 +77,14 @@ function Compilator() {
                 <button className="compilator-button" onClick={downLoadCompiledPdf}>
                     Submit
                 </button>
-                <button className="compilator-button" onClick={saveCompiledPdf}>
+                <button
+                    className="compilator-button"
+                    onClick={saveCompiledPdf}
+                    disabled={!title.trim()}
+                >
                     Save PDF
                 </button>
+
             </div>
 
             {loading && (

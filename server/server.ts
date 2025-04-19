@@ -1,12 +1,14 @@
 import express from 'express'
 import cors from 'cors'
-import compilatorRoute from './routes/compilatorRoute'
+import compilator from './routes/compilator'
+import downloads from './routes/downloads'
 
 const app = express()
 app.use(cors())
 app.use(express.json())
 
-app.use('/api/compilator', compilatorRoute)
+app.use('/api/compilator', compilator)
+app.use('/api/downloads', downloads)
 
 const PORT = 3001
 app.listen(PORT, () => {

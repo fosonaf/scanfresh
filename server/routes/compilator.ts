@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { spawn } from 'child_process'
-import { ObjectId, MongoClient } from 'mongodb'
+import { MongoClient } from 'mongodb'
 import path from 'path'
 import fs from 'fs'
 import os from 'os'
@@ -73,7 +73,7 @@ router.post('/compile', async (req, res) => {
 })
 
 router.post('/save', async (req, res) => {
-    const { urls } = req.body
+    const { urls, title } = req.body
 
     if (!urls) {
         return res.status(400).json({ success: false, error: 'No URLs provided' })
@@ -112,6 +112,7 @@ router.post('/save', async (req, res) => {
 
                 const insertResult = await collection.insertOne({
                     createdAt: new Date(),
+                    title: title?.trim(),
                     urls: urlsList,
                     file: pdfBuffer,
                 })
@@ -128,50 +129,6 @@ router.post('/save', async (req, res) => {
         })
     } catch (err) {
         console.error('Server error:', err)
-        res.status(500).json({ success: false, error: 'Server error' })
-    }
-})
-
-router.get('/downloads/:id', async (req, res) => {
-    const { id } = req.params
-
-    try {
-        await client.connect()
-        const db = client.db(dbName)
-        const collection = db.collection('downloaded_scan')
-
-        const doc = await collection.findOne({ _id: new ObjectId(id) })
-
-        if (!doc || !doc.file) {
-            return res.status(404).json({ success: false, error: 'PDF not found' })
-        }
-
-        res.set({
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename=${id}.pdf`,
-        })
-
-        res.send(Buffer.from(doc.file.buffer))
-    } catch (err) {
-        console.error('Error fetching PDF:', err)
-        res.status(500).json({ success: false, error: 'Server error' })
-    }
-})
-
-router.get('/downloads', async (_req, res) => {
-    try {
-        await client.connect()
-        const db = client.db(dbName)
-        const collection = db.collection('downloaded_scan')
-
-        const list = await collection
-            .find({}, { projection: { _id: 1, createdAt: 1 } })
-            .sort({ createdAt: -1 })
-            .toArray()
-
-        res.json({ success: true, data: list })
-    } catch (err) {
-        console.error('Error listing PDFs:', err)
         res.status(500).json({ success: false, error: 'Server error' })
     }
 })
