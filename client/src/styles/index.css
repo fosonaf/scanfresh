@@ -11,8 +11,8 @@ body {
 }
 
 .dark {
-    background-color: #121212;
     color: #fbbf24;
+    text-align: center;
 }
 
 button {

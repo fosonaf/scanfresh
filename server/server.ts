@@ -6,7 +6,7 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-app.use('/api/log-compilator', compilatorRoute)
+app.use('/api/compilator', compilatorRoute)
 
 const PORT = 3001
 app.listen(PORT, () => {

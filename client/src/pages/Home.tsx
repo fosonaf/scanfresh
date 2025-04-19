@@ -1,6 +1,6 @@
 function Home() {
     return <div className="dark">
-        <h1>Page d'accueil</h1>
+        <h1>Welcome to Scanfresh, the easymaker mangas and animes tool</h1>
     </div>
 }
 

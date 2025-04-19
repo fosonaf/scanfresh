@@ -1,8 +1,18 @@
+import { useState } from 'react'
 import '../styles/compilator.css'
 
 function Compilator() {
+    const [urls, setUrls] = useState('')
+
     const sendLogs = async () => {
-        const res = await fetch('http://localhost:3001/api/log-compilator')
+        const res = await fetch('http://localhost:3001/api/compilator/compile', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ urls }),
+        })
+
         const data = await res.json()
         console.log('Response:', data)
     }
@@ -14,11 +24,12 @@ function Compilator() {
                 className="compilator-textarea"
                 placeholder="Paste your list of URLs here..."
                 rows={10}
-            ></textarea>
-            <button
-                className="compilator-button"
-                onClick={sendLogs}
-            >Submit</button>
+                value={urls}
+                onChange={(e) => setUrls(e.target.value)}
+            />
+            <button className="compilator-button" onClick={sendLogs}>
+                Submit
+            </button>
         </div>
     )
 }
