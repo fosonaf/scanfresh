@@ -1,13 +1,13 @@
 import { useState } from 'react'
-import { Circles } from 'react-loader-spinner'  // Import du spinner
+import { Circles } from 'react-loader-spinner'
 import '../styles/compilator.css'
 
 function Compilator() {
     const [urls, setUrls] = useState('')
-    const [loading, setLoading] = useState(false) // Ajout de l'état loading
+    const [loading, setLoading] = useState(false)
 
     const downLoadCompiledPdf = async () => {
-        setLoading(true)  // Active le loader au début de la requête
+        setLoading(true)
         try {
             const res = await fetch('http://localhost:3001/api/compilator/compile', {
                 method: 'POST',
@@ -31,13 +31,13 @@ function Compilator() {
         } catch (error) {
             console.error('Error during fetch:', error)
         } finally {
-            setLoading(false)  // Désactive le loader après la réponse
+            setLoading(false)
         }
     }
 
     return (
         <div className="compilator-container">
-            <h1 className="compilator-title">Compilator</h1>
+            <h1 className="compilator-title">Download</h1>
             <textarea
                 className="compilator-textarea"
                 placeholder="Paste your list of URLs here..."
@@ -49,7 +49,6 @@ function Compilator() {
                 Submit
             </button>
 
-            {/* Overlay + Loader */}
             {loading && (
                 <div className="overlay">
                     <div className="loader">
