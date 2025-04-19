@@ -65,12 +65,14 @@ function Compilator() {
                 value={urls}
                 onChange={(e) => setUrls(e.target.value)}
             />
-            <button className="compilator-button" onClick={downLoadCompiledPdf}>
-                Submit
-            </button>
-            <button className="compilator-button" onClick={saveCompiledPdf}>
-                Save PDF
-            </button>
+            <div className="actions">
+                <button className="compilator-button" onClick={downLoadCompiledPdf}>
+                    Submit
+                </button>
+                <button className="compilator-button" onClick={saveCompiledPdf}>
+                    Save PDF
+                </button>
+            </div>
 
             {loading && (
                 <div className="overlay">

@@ -17,6 +17,7 @@ function Sidebar({ isOpen, onToggle }: SidebarProps) {
                     <ul>
                         <li><Link to="/">Home</Link></li>
                         <li><Link to="/compilator">Compilator</Link></li>
+                        <li><Link to="/downloads">Downloads</Link></li>
                     </ul>
                 </nav>
             )}
