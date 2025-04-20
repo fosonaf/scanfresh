@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import '../styles/index.css'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 type DownloadEntry = {
     _id: string
@@ -31,12 +32,26 @@ function Downloads() {
         fetchDownloads()
     }, [])
 
-    const downloadPdf = (id: string) => {
+    const handleDownload = (id: string) => {
         const link = document.createElement('a')
         link.href = `http://localhost:3001/api/downloads/${id}`
         link.download = `${id}.pdf`
         link.click()
     }
+
+    const handleEdit = (id: string) => {
+        console.log(`Modifier PDF ${id}`)
+    }
+
+    const handleDelete = (id: string) => {
+        console.log(`Supprimer PDF ${id}`)
+    }
+
+    const truncateTitle = (title: string, maxLength = 28) => {
+        if (title.length < maxLength) return title
+        return title.slice(0, maxLength) + '…'
+    }
+
 
     return (
         <div className="compilator-container">
@@ -45,15 +60,45 @@ function Downloads() {
             {loading ? (
                 <p>Loading...</p>
             ) : (
-                <ul>
+                <table className="datatable">
+                    <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Modify</th>
+                        <th>Download</th>
+                        <th>Delete</th>
+                    </tr>
+                    </thead>
+                    <tbody>
                     {pdfs.map((pdf) => (
-                        <li key={pdf._id}>
-                            <a href={`http://localhost:3001/api/downloads/${pdf._id}`} download>
-                                {pdf.title?.trim() || pdf._id}
-                            </a>
-                        </li>
+                        <tr key={pdf._id}>
+                            <td>
+                                <button
+                                    className="datatable-link"
+                                    onClick={() => handleDownload(pdf._id)}
+                                >
+                                    {truncateTitle(pdf.title?.trim() || pdf._id)}
+                                </button>
+                            </td>
+                            <td className="datatable-action">
+                                <button onClick={() => handleEdit(pdf._id)}>
+                                    <FontAwesomeIcon icon="pen" />
+                                </button>
+                            </td>
+                            <td className="datatable-action">
+                                <button onClick={() => handleDownload(pdf._id)}>
+                                    <FontAwesomeIcon icon="download" />
+                                </button>
+                            </td>
+                            <td className="datatable-action">
+                                <button onClick={() => handleDelete(pdf._id)}>
+                                    <FontAwesomeIcon icon="trash" />
+                                </button>
+                            </td>
+                        </tr>
                     ))}
-                </ul>
+                    </tbody>
+                </table>
             )}
         </div>
     )

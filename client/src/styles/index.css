@@ -106,3 +106,53 @@ button:disabled {
 .actions button {
     margin: 1rem;
 }
+
+.datatable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 2rem;
+    background-color: #2a2a2a;
+    color: #fbbf24;
+}
+
+.datatable th,
+.datatable td {
+    padding: 1rem;
+    border: 1px solid #444;
+    text-align: center;
+}
+
+.datatable th {
+    background-color: #1e1e1e;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.datatable-link {
+    background: none;
+    border: none;
+    color: #fbbf24;
+    cursor: pointer;
+    font-weight: bold;
+    width: 40%;
+}
+
+.datatable button {
+    background-color: #fbbf24;
+    border: none;
+    color: #1e1e1e;
+    padding: 0.3rem 0.7rem;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 1rem;
+    word-break: break-word;
+    white-space: normal;
+}
+
+.datatable button:hover {
+    background-color: #e69500;
+}
+
+.datatable-action {
+    width: 10%;
+}

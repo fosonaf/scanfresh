@@ -6,6 +6,10 @@
     background-color: #2a2a2a;
     padding: 1rem;
     box-sizing: border-box;
+
+    .menu-icon {
+        margin-right: 1rem;
+    }
 }
 
 .sidebar.closed {
@@ -28,6 +32,7 @@
 
 .sidebar nav li {
     margin: 1rem 0;
+    height: 2rem;
 }
 
 .sidebar a {
@@ -35,8 +40,26 @@
     color: #ffa500;
     text-decoration: none;
     margin-bottom: 1rem;
+    font-size: 1.4rem;
 }
 
 .sidebar a:hover {
     text-decoration: underline;
+}
+
+.menu-label-wrapper {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: max-width 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+    max-width: 0;
+    opacity: 0;
+    transform: translateX(-10px);
+    vertical-align: middle;
+}
+
+.sidebar.open .menu-label-wrapper {
+    max-width: 200px;
+    opacity: 1;
+    transform: translateX(0);
 }
