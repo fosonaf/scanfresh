@@ -37,7 +37,7 @@ function Compilator() {
     }
 
     const downLoadCompiledPdf = () => {
-        postAndHandle('http://localhost:3001/api/compilator/compile', async (res) => {
+        postAndHandle('https://scanfresh.onrender.com/api/compilator/compile', async (res) => {
             const blob = await res.blob()
             const url = window.URL.createObjectURL(blob)
             const a = document.createElement('a')
