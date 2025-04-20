@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { MongoClient, ObjectId, GridFSBucket } from 'mongodb'
 
 const router = Router()
-const uri = 'mongodb://localhost:27017'
+const uri = 'mongodb+srv://fosonaf:passwd001@scanfresh-mongo.3igqvta.mongodb.net'
 const client = new MongoClient(uri)
 const dbName = 'scanfresh'
 

@@ -1,0 +1,5 @@
+requests
+Pillow
+fpdf
+beautifulsoup4
+cloudscraper

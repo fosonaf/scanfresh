@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect('mongodb://localhost:27017/scanfresh');
+mongoose.connect('mongodb+srv://fosonaf:passwd001@scanfresh-mongo.3igqvta.mongodb.net/scanfresh');
 
 app.post('/generate-pdf', (req, res) => {
     const { urls } = req.body;
@@ -18,4 +18,4 @@ app.post('/generate-pdf', (req, res) => {
     process.stdout.pipe(res);
 });
 
-app.listen(3001, () => console.log('Backend running on http://localhost:3001'));
+app.listen(3001, () => console.log('Backend running'));

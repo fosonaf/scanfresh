@@ -4,9 +4,14 @@ import { MongoClient, GridFSBucket } from 'mongodb';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const router = Router();
-const uri = 'mongodb://localhost:27017';
+const uri = 'mongodb+srv://fosonaf:passwd001@scanfresh-mongo.3igqvta.mongodb.net';
 const client = new MongoClient(uri);
 const dbName = 'scanfresh';
 
@@ -34,6 +39,10 @@ router.post('/compile', async (req, res) => {
 
         python.stderr.on('data', (data) => {
             console.error(`stderr: ${data.toString()}`);
+        });
+
+        python.stdout.on('data', (data) => {
+            console.log(`stdout: ${data.toString()}`);
         });
 
         python.on('close', (code) => {
