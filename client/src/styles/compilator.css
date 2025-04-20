@@ -19,10 +19,11 @@
     color: #ffa500;
     border: none;
     resize: vertical;
-    margin-top: 10px;
+    margin-top: 1rem;
 }
 
 .compilator-input {
+    float: left;
     width: 25%;
 }
 
@@ -71,5 +72,5 @@
 }
 
 .actions button {
-    margin: 0 1rem;
+    margin: 1rem;
 }
