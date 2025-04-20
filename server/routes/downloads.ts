@@ -50,4 +50,26 @@ router.get('/', async (req, res) => {
     }
 })
 
+router.delete('/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        await client.connect();
+        const db = client.db(dbName);
+        const collection = db.collection('downloaded_scan');
+
+        const result = await collection.deleteOne({ _id: new ObjectId(id) });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ success: false, error: 'PDF not found' });
+        }
+
+        res.json({ success: true, message: 'PDF deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting PDF:', err);
+        res.status(500).json({ success: false, error: 'Server error' });
+    }
+});
+
+
 export default router

@@ -12,23 +12,23 @@ function Downloads() {
     const [pdfs, setPdfs] = useState<DownloadEntry[]>([])
     const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
-        const fetchDownloads = async () => {
-            try {
-                const res = await fetch('http://localhost:3001/api/downloads')
-                const json = await res.json()
-                if (res.ok) {
-                    setPdfs(json.data)
-                } else {
-                    console.error('Failed to fetch pdfs:', json.error)
-                }
-            } catch (err) {
-                console.error('Error fetching pdfs:', err)
-            } finally {
-                setLoading(false)
+    const fetchDownloads = async () => {
+        try {
+            const res = await fetch('http://localhost:3001/api/downloads')
+            const json = await res.json()
+            if (res.ok) {
+                setPdfs(json.data)
+            } else {
+                console.error('Failed to fetch pdfs:', json.error)
             }
+        } catch (err) {
+            console.error('Error fetching pdfs:', err)
+        } finally {
+            setLoading(false)
         }
+    }
 
+    useEffect(() => {
         fetchDownloads()
     }, [])
 
@@ -43,9 +43,24 @@ function Downloads() {
         console.log(`Modifier PDF ${id}`)
     }
 
-    const handleDelete = (id: string) => {
-        console.log(`Supprimer PDF ${id}`)
-    }
+    const handleDelete = async (id: string) => {
+        try {
+            const response = await fetch(`http://localhost:3001/api/downloads/${id}`, {
+                method: 'DELETE',
+            });
+
+            const json = await response.json();
+
+            if (response.ok) {
+                setPdfs(pdfs.filter(pdf => pdf._id !== id));
+            } else {
+                console.error('Failed to delete PDF:', json.error);
+            }
+        } catch (err) {
+            console.error('Error deleting PDF:', err);
+        }
+    };
+
 
     const truncateTitle = (title: string, maxLength = 28) => {
         if (title.length < maxLength) return title
