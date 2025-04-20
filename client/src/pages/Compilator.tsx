@@ -50,27 +50,52 @@ function Compilator() {
         })
     }
 
-    const saveCompiledPdf = () => {
+    const saveCompiledPdf = async () => {
         setLoading(true)
-        fetch(apiUrl + '/save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ urls, title }),
-        })
-            .then((res) => {
-                if (res.ok) {
-                    alert('PDF is being saved in the background.')
+        const urlsArray = urls.split('\n')
+
+        const saveUrl = async (url: string, index: number) => {
+            try {
+                // Extraire le nom du fichier après le dernier slash de l'URL
+                const fileName = url.trim().split('/').pop()
+
+                let finalTitle: string
+                if (title.trim()) {
+                    // Si plusieurs URLs sont présentes, on incrémente avec un espace comme délimiteur
+                    if (urlsArray.length > 1) {
+                        finalTitle = `${index + 1} ${title}`
+                    } else {
+                        // Si une seule URL, on met simplement le title
+                        finalTitle = title
+                    }
                 } else {
-                    alert('Failed to start PDF save.')
+                    // Si pas de title, on utilise le suffixe de l'URL
+                    finalTitle = fileName || `PDF-${index + 1}`
                 }
-            })
-            .catch((err) => {
-                console.error('Unexpected error:', err)
-                alert('Unexpected error')
-            })
-            .finally(() => {
-                setLoading(false)
-            })
+
+                const res = await fetch(apiUrl + '/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ urls: url.trim(), title: finalTitle }),
+                })
+
+                if (res.ok) {
+                    console.log(`PDF ${index + 1} saved successfully with title: ${finalTitle}`)
+                } else {
+                    alert(`Failed to save PDF ${index + 1}.`)
+                }
+            } catch (err) {
+                console.error(`Unexpected error saving PDF ${index + 1}:`, err)
+                alert(`Unexpected error saving PDF ${index + 1}`)
+            }
+        }
+
+        // Boucler sur toutes les URLs et appeler `saveUrl`
+        for (const [index, url] of urlsArray.entries()) {
+            await saveUrl(url, index)
+        }
+
+        setLoading(false) // Arrêter le loader après toutes les sauvegardes
     }
 
     return (
@@ -97,7 +122,6 @@ function Compilator() {
                 <button
                     className="compilator-button"
                     onClick={saveCompiledPdf}
-                    disabled={!title.trim()}
                 >
                     Save PDF
                 </button>
