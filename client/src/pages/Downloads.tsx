@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import '../styles/index.css'
 
 type DownloadEntry = {
     _id: string

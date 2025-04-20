@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import './Sidebar.css'
+import '../index.css'
 
 interface SidebarProps {
     isOpen: boolean
