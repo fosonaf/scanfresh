@@ -49,7 +49,7 @@ function Compilator() {
     }
 
     const saveCompiledPdf = () => {
-        postAndHandle('http://localhost:3001/api/compilator/save', async (res) => {
+        postAndHandle('https://scanfresh.onrender.com/api/compilator/save', async (res) => {
             const json = await res.json()
             console.log('PDF saved in DB with ID:', json.id)
             alert('PDF successfully saved!')

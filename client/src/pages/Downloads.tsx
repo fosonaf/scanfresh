@@ -14,7 +14,7 @@ function Downloads() {
 
     const fetchDownloads = async () => {
         try {
-            const res = await fetch('http://localhost:3001/api/downloads')
+            const res = await fetch('https://scanfresh.onrender.com/api/downloads')
             const json = await res.json()
             if (res.ok) {
                 setPdfs(json.data)

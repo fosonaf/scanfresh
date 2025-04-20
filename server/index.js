@@ -18,4 +18,4 @@ app.post('/generate-pdf', (req, res) => {
     process.stdout.pipe(res);
 });
 
-app.listen(3001, () => console.log('Backend running on http://localhost:3001'));
+app.listen(3001, () => console.log('Backend running'));
