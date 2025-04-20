@@ -58,7 +58,7 @@ function Compilator() {
 
     return (
         <div className="compilator-container">
-            <h1 className="compilator-title">Download</h1>
+            <h1 className="compilator-title">Compile to PDF</h1>
             <input
                 className="compilator-text-input compilator-input"
                 type="text"
