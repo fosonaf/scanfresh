@@ -7,8 +7,8 @@
 }
 
 .main-content {
-    flex-grow: 1; /* La main-container prend l'espace restant */
+    flex-grow: 1;
     padding: 20px;
-    overflow-y: auto; /* Ajoute un scroll vertical */
+    overflow-y: auto;
     height: 100vh;
 }

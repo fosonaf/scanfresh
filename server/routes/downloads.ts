@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { MongoClient, ObjectId } from "mongodb";
+import { MongoClient, ObjectId, GridFSBucket } from 'mongodb'
 
 const router = Router()
 const uri = 'mongodb://localhost:27017'
@@ -12,35 +12,44 @@ router.get('/:id', async (req, res) => {
     try {
         await client.connect()
         const db = client.db(dbName)
-        const collection = db.collection('downloaded_scan')
+        const bucket = new GridFSBucket(db, { bucketName: 'pdfs' })
 
-        const doc = await collection.findOne({ _id: new ObjectId(id) })
+        const fileId = new ObjectId(id)
 
-        if (!doc || !doc.file) {
+        const fileDoc = await db.collection('pdfs.files').findOne({ _id: fileId })
+        if (!fileDoc) {
             return res.status(404).json({ success: false, error: 'PDF not found' })
         }
 
         res.set({
             'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename=${id}.pdf`,
+            'Content-Disposition': `attachment; filename="${fileDoc.filename}.pdf"`,
         })
 
-        res.send(Buffer.from(doc.file.buffer))
+        const downloadStream = bucket.openDownloadStream(fileId)
+        downloadStream.pipe(res).on('error', (err) => {
+            console.error('Stream error:', err)
+            res.status(500).end()
+        })
+
     } catch (err) {
-        console.error('Error fetching PDF:', err)
+        console.error('Error downloading PDF:', err)
         res.status(500).json({ success: false, error: 'Server error' })
     }
 })
 
-router.get('/', async (req, res) => {
+router.get('/', async (_req, res) => {
     try {
+        await client.connect()
         const db = client.db(dbName)
-        const downloads = await db.collection('downloaded_scan').find().toArray()
 
-        const result = downloads.map((pdf: any) => ({
-            _id: pdf._id.toString(),
-            title: pdf.title || '',
-            createdAt: pdf.createdAt,
+        const files = await db.collection('pdfs.files').find().sort({ uploadDate: -1 }).toArray()
+
+        const result = files.map((file: any) => ({
+            _id: file._id.toString(),
+            title: file.filename,
+            createdAt: file.uploadDate,
+            metadata: file.metadata || {},
         }))
 
         res.json({ success: true, data: result })
@@ -51,25 +60,26 @@ router.get('/', async (req, res) => {
 })
 
 router.delete('/:id', async (req, res) => {
-    const { id } = req.params;
+    const { id } = req.params
 
     try {
-        await client.connect();
-        const db = client.db(dbName);
-        const collection = db.collection('downloaded_scan');
+        await client.connect()
+        const db = client.db(dbName)
+        const bucket = new GridFSBucket(db, { bucketName: 'pdfs' })
 
-        const result = await collection.deleteOne({ _id: new ObjectId(id) });
+        const fileId = new ObjectId(id)
 
-        if (result.deletedCount === 0) {
-            return res.status(404).json({ success: false, error: 'PDF not found' });
+        await bucket.delete(fileId)
+
+        res.json({ success: true, message: 'PDF deleted successfully' })
+    } catch (err: any) {
+        if (err.message.includes('FileNotFound')) {
+            return res.status(404).json({ success: false, error: 'PDF not found' })
         }
 
-        res.json({ success: true, message: 'PDF deleted successfully' });
-    } catch (err) {
-        console.error('Error deleting PDF:', err);
-        res.status(500).json({ success: false, error: 'Server error' });
+        console.error('Error deleting PDF:', err)
+        res.status(500).json({ success: false, error: 'Server error' })
     }
-});
-
+})
 
 export default router

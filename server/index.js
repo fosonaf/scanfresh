@@ -7,10 +7,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Connexion Mongo
 mongoose.connect('mongodb://localhost:27017/scanfresh');
 
-// Exemple de route PDF
 app.post('/generate-pdf', (req, res) => {
     const { urls } = req.body;
 
