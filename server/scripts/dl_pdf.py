@@ -1,13 +1,13 @@
 import os
 import sys
-import requests
 import io
+import json
+import imghdr
+import tempfile
 from PIL import Image
 from fpdf import FPDF
 from bs4 import BeautifulSoup
-import imghdr
-import tempfile
-import json
+import cloudscraper
 
 def extract_images_from_html(html_content):
     print("Extracting images from HTML...")
@@ -24,6 +24,7 @@ def download_images_from_urls(urls, output_path):
     print(f"Starting to download images for {len(urls)} URLs...")
 
     pdf = FPDF()
+    scraper = cloudscraper.create_scraper()  # ✅ Initialisation de cloudscraper
 
     for url in urls:
         url = url.strip()
@@ -36,7 +37,7 @@ def download_images_from_urls(urls, output_path):
                 'Accept-Language': 'en-US,en;q=0.9',
                 'Connection': 'keep-alive'
             }
-            response = requests.get(url, headers=headers)
+            response = scraper.get(url, headers=headers)  # ✅ Utilisation de cloudscraper
             if response.status_code == 200:
                 print(f"Successfully fetched HTML content for {url}")
                 html_content = response.text
@@ -45,11 +46,11 @@ def download_images_from_urls(urls, output_path):
                     try:
                         print(f"Downloading image from {image_url}")
                         image_headers = {
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                            'User-Agent': headers['User-Agent'],
                             'Referer': url,
                             'Accept': 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
                         }
-                        image_response = requests.get(image_url, headers=image_headers)
+                        image_response = scraper.get(image_url, headers=image_headers)  # ✅ cloudscraper ici aussi
                         if image_response.status_code == 200:
                             image_data = image_response.content
                             if imghdr.what(None, h=image_data) is not None:
@@ -95,5 +96,5 @@ if __name__ == "__main__":
         print(f"Output PDF path: {output_path}")
         download_images_from_urls(urls, output_path)
     except Exception as e:
-        print(f"An error occurred: {e}", file=sys.stderr)  # Capture l'erreur détaillée
+        print(f"An error occurred: {e}", file=sys.stderr)
         sys.exit(1)
