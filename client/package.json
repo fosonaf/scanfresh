@@ -7,7 +7,6 @@
     "tailwind:init": "tailwindcss init -p",
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "postbuild": "cp -r dist ../server/public",
     "lint": "eslint .",
     "preview": "vite preview"
   },
