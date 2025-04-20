@@ -27,6 +27,7 @@ button:disabled {
 }
 
 .compilator-container {
+    display: grid;
     gap: 1rem;
     text-align: center;
 
@@ -47,7 +48,6 @@ button:disabled {
     color: #ffa500;
     border: none;
     resize: vertical;
-    margin-top: 1rem;
 }
 
 .compilator-input {
@@ -57,6 +57,11 @@ button:disabled {
 
 .compilator-textarea {
     width: 100%;
+}
+
+.compilator-advice {
+    font-size: 1.2rem;
+    text-align: left;
 }
 
 .compilator-button {

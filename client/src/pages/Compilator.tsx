@@ -108,6 +108,9 @@ function Compilator() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
             />
+            <h3 className="compilator-advice">
+                As script is heavy, we advice no more than 4 urls
+            </h3>
             <textarea
                 className="compilator-text-input compilator-textarea"
                 placeholder="Paste your list of URLs here..."
