@@ -30,7 +30,11 @@ def download_images_from_urls(urls, output_path):
         print(f"Processing URL: {url}")
         try:
             headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                'Referer': url,
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Connection': 'keep-alive'
             }
             response = requests.get(url, headers=headers)
             if response.status_code == 200:
@@ -40,10 +44,12 @@ def download_images_from_urls(urls, output_path):
                 for image_url in images:
                     try:
                         print(f"Downloading image from {image_url}")
-                        headers = {
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+                        image_headers = {
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                            'Referer': url,
+                            'Accept': 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
                         }
-                        image_response = requests.get(image_url, headers=headers)
+                        image_response = requests.get(image_url, headers=image_headers)
                         if image_response.status_code == 200:
                             image_data = image_response.content
                             if imghdr.what(None, h=image_data) is not None:
