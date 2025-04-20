@@ -34,7 +34,7 @@ function Downloads() {
 
     const handleDownload = (id: string) => {
         const link = document.createElement('a')
-        link.href = `http://localhost:3001/api/downloads/${id}`
+        link.href = `https://scanfresh.onrender.com/api/downloads/${id}`
         link.download = `${id}.pdf`
         link.click()
     }
@@ -45,7 +45,7 @@ function Downloads() {
 
     const handleDelete = async (id: string) => {
         try {
-            const response = await fetch(`http://localhost:3001/api/downloads/${id}`, {
+            const response = await fetch(`https://scanfresh.onrender.com/api/downloads/${id}`, {
                 method: 'DELETE',
             });
 

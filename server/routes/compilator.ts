@@ -41,6 +41,10 @@ router.post('/compile', async (req, res) => {
             console.error(`stderr: ${data.toString()}`);
         });
 
+        python.stdout.on('data', (data) => {
+            console.log(`stdout: ${data.toString()}`);
+        });
+
         python.on('close', (code) => {
             if (code !== 0) {
                 console.error(`Python script failed with exit code ${code}`);
