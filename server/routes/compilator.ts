@@ -32,7 +32,6 @@ router.post('/compile', async (req, res) => {
         const outputPdfPath = path.join(tempDir, `result_${Date.now()}.pdf`);
 
         const scriptPath = path.resolve(__dirname, '../scripts/dl_pdf.py');
-
         const urlsArg = JSON.stringify(urlsList);
 
         const python = spawn('python', [scriptPath, urlsArg, outputPdfPath]);
@@ -78,66 +77,67 @@ router.post('/save', async (req, res) => {
         return res.status(400).json({ success: false, error: 'No URLs provided' });
     }
 
-    try {
-        const urlsList: string[] = urls
-            .split('\n')
-            .map((u: string) => u.trim())
-            .filter(Boolean);
+    // Réponse immédiate
+    res.status(202).json({ success: true, message: 'Save started in background' });
 
-        const tempDir = os.tmpdir();
-        const outputPdfPath = path.join(tempDir, `result_${Date.now()}.pdf`);
+    // Traitement en arrière-plan (pas await)
+    (async () => {
+        try {
+            const urlsList: string[] = urls
+                .split('\n')
+                .map((u: string) => u.trim())
+                .filter(Boolean);
 
-        const scriptPath = path.resolve(__dirname, '../scripts/dl_pdf.py');
-        const urlsArg = JSON.stringify(urlsList);
+            const tempDir = os.tmpdir();
+            const outputPdfPath = path.join(tempDir, `result_${Date.now()}.pdf`);
+            const scriptPath = path.resolve(__dirname, '../scripts/dl_pdf.py');
+            const urlsArg = JSON.stringify(urlsList);
 
-        const python = spawn('python', [scriptPath, urlsArg, outputPdfPath]);
+            const python = spawn('python', [scriptPath, urlsArg, outputPdfPath]);
 
-        python.stderr.on('data', (data) => {
-            console.error(`stderr: ${data.toString()}`);
-        });
+            python.stderr.on('data', (data) => {
+                console.error(`stderr: ${data.toString()}`);
+            });
 
-        python.on('close', async (code) => {
-            if (code !== 0) {
-                console.error(`Python script failed with exit code ${code}`);
-                return res.status(500).json({ success: false, error: 'Python script failed' });
-            }
+            python.on('close', async (code) => {
+                if (code !== 0) {
+                    return console.error(`Python script failed with code ${code}`);
+                }
 
-            try {
-                const pdfBuffer = fs.readFileSync(outputPdfPath);
+                try {
+                    const pdfBuffer = fs.readFileSync(outputPdfPath);
 
-                await client.connect();
-                const db = client.db(dbName);
-                const bucket = new GridFSBucket(db, { bucketName: 'pdfs' });
+                    await client.connect();
+                    const db = client.db(dbName);
+                    const bucket = new GridFSBucket(db, { bucketName: 'pdfs' });
 
-                const uploadStream = bucket.openUploadStream(title?.trim() || 'Untitled', {
-                    metadata: { urls: urlsList, createdAt: new Date() }
-                });
-
-                uploadStream.end(pdfBuffer);
-
-                uploadStream.on('error', (err) => {
-                    console.error("Error uploading PDF to GridFS:", err);
-                    return res.status(500).json({ success: false, error: 'Failed to upload PDF to GridFS' });
-                });
-
-                uploadStream.on('finish', () => {
-                    const fileId = uploadStream.id;
-
-                    fs.unlink(outputPdfPath, (unlinkErr) => {
-                        if (unlinkErr) console.error('Error deleting temp PDF:', unlinkErr);
+                    const uploadStream = bucket.openUploadStream(title?.trim() || 'Untitled', {
+                        metadata: { urls: urlsList, createdAt: new Date() }
                     });
 
-                    return res.status(200).json({ success: true, fileId });
-                });
-            } catch (err) {
-                console.error('Error saving to DB:', err);
-                return res.status(500).json({ success: false, error: 'Failed to save PDF' });
-            }
-        });
-    } catch (err) {
-        console.error('Server error:', err);
-        res.status(500).json({ success: false, error: 'Server error' });
-    }
+                    uploadStream.end(pdfBuffer);
+
+                    uploadStream.on('error', (err) => {
+                        console.error("Error uploading PDF to GridFS:", err);
+                    });
+
+                    uploadStream.on('finish', () => {
+                        fs.unlink(outputPdfPath, (unlinkErr) => {
+                            if (unlinkErr) console.error('Error deleting temp PDF:', unlinkErr);
+                        });
+
+                        console.log('PDF saved successfully with ID:', uploadStream.id);
+                    });
+                } catch (err) {
+                    console.error('Error saving to DB:', err);
+                }
+            });
+
+        } catch (err) {
+            console.error('Background task error:', err);
+        }
+    })();
 });
+
 
 export default router;

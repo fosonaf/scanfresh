@@ -51,11 +51,26 @@ function Compilator() {
     }
 
     const saveCompiledPdf = () => {
-        postAndHandle(apiUrl + '/save', async (res) => {
-            const json = await res.json()
-            console.log('PDF saved in DB with ID:', json.id)
-            alert('PDF successfully saved!')
+        setLoading(true)
+        fetch(apiUrl + '/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ urls, title }),
         })
+            .then((res) => {
+                if (res.ok) {
+                    alert('PDF is being saved in the background.')
+                } else {
+                    alert('Failed to start PDF save.')
+                }
+            })
+            .catch((err) => {
+                console.error('Unexpected error:', err)
+                alert('Unexpected error')
+            })
+            .finally(() => {
+                setLoading(false)
+            })
     }
 
     return (
@@ -86,7 +101,6 @@ function Compilator() {
                 >
                     Save PDF
                 </button>
-
             </div>
 
             {loading && (
