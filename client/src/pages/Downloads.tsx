@@ -12,9 +12,11 @@ function Downloads() {
     const [pdfs, setPdfs] = useState<DownloadEntry[]>([])
     const [loading, setLoading] = useState(true)
 
+    const apiUrl = import.meta.env.VITE_API_URL + '/downloads'
+
     const fetchDownloads = async () => {
         try {
-            const res = await fetch('https://scanfresh.onrender.com/api/downloads')
+            const res = await fetch(apiUrl)
             const json = await res.json()
             if (res.ok) {
                 setPdfs(json.data)
@@ -34,7 +36,7 @@ function Downloads() {
 
     const handleDownload = (id: string) => {
         const link = document.createElement('a')
-        link.href = `https://scanfresh.onrender.com/api/downloads/${id}`
+        link.href = `${apiUrl}/${id}`
         link.download = `${id}.pdf`
         link.click()
     }
@@ -45,28 +47,26 @@ function Downloads() {
 
     const handleDelete = async (id: string) => {
         try {
-            const response = await fetch(`https://scanfresh.onrender.com/api/downloads/${id}`, {
+            const response = await fetch(`${apiUrl}/${id}`, {
                 method: 'DELETE',
-            });
+            })
 
-            const json = await response.json();
+            const json = await response.json()
 
             if (response.ok) {
-                setPdfs(pdfs.filter(pdf => pdf._id !== id));
+                setPdfs(pdfs.filter(pdf => pdf._id !== id))
             } else {
-                console.error('Failed to delete PDF:', json.error);
+                console.error('Failed to delete PDF:', json.error)
             }
         } catch (err) {
-            console.error('Error deleting PDF:', err);
+            console.error('Error deleting PDF:', err)
         }
-    };
-
+    }
 
     const truncateTitle = (title: string, maxLength = 28) => {
         if (title.length < maxLength) return title
         return title.slice(0, maxLength) + '…'
     }
-
 
     return (
         <div className="compilator-container">

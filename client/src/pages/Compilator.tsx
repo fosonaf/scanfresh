@@ -7,6 +7,8 @@ function Compilator() {
     const [loading, setLoading] = useState(false)
     const [title, setTitle] = useState('')
 
+    const apiUrl = import.meta.env.VITE_API_URL + '/compilator'
+
     const postAndHandle = async (
         endpoint: string,
         onSuccess: (res: Response) => Promise<void>
@@ -37,7 +39,7 @@ function Compilator() {
     }
 
     const downLoadCompiledPdf = () => {
-        postAndHandle('https://scanfresh.onrender.com/api/compilator/compile', async (res) => {
+        postAndHandle(apiUrl + '/compile', async (res) => {
             const blob = await res.blob()
             const url = window.URL.createObjectURL(blob)
             const a = document.createElement('a')
@@ -49,7 +51,7 @@ function Compilator() {
     }
 
     const saveCompiledPdf = () => {
-        postAndHandle('https://scanfresh.onrender.com/api/compilator/save', async (res) => {
+        postAndHandle(apiUrl + '/save', async (res) => {
             const json = await res.json()
             console.log('PDF saved in DB with ID:', json.id)
             alert('PDF successfully saved!')

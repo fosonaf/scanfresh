@@ -13,8 +13,7 @@
     "allowSyntheticDefaultImports": true
   },
   "include": [
-    "client/**/*",  // Inclure le code frontend dans le dossier client
-    "server/**/*"  // Inclure le code backend dans le dossier service
+    "server/*.ts"
   ],
   "exclude": [
     "node_modules"
