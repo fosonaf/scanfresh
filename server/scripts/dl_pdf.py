@@ -2,7 +2,6 @@ import os
 import sys
 import io
 import json
-import imghdr
 import tempfile
 import traceback
 from PIL import Image
@@ -14,6 +13,25 @@ import cloudscraper
 def log(message):
     """Log vers stderr pour déboguer"""
     print(f"[DEBUG] {message}", file=sys.stderr, flush=True)
+
+def detect_image_type(image_data):
+    """Détecte le type d'image à partir des magic bytes (remplace imghdr)"""
+    if image_data.startswith(b'\xff\xd8\xff'):
+        return 'jpeg'
+    elif image_data.startswith(b'\x89PNG\r\n\x1a\n'):
+        return 'png'
+    elif image_data.startswith(b'GIF87a') or image_data.startswith(b'GIF89a'):
+        return 'gif'
+    elif image_data.startswith(b'RIFF') and image_data[8:12] == b'WEBP':
+        return 'webp'
+    elif image_data.startswith(b'BM'):
+        return 'bmp'
+    # Essayer avec PIL comme fallback
+    try:
+        img = Image.open(io.BytesIO(image_data))
+        return img.format.lower() if img.format else None
+    except:
+        return None
 
 def extract_images_from_html(html_content):
     log("Extracting images from HTML...")
@@ -97,8 +115,8 @@ def download_images_from_urls(urls, output_path):
                             image_data = image_response.content
                             log(f"    Downloaded {len(image_data)} bytes")
 
-                            # Vérifier le format de l'image
-                            img_type = imghdr.what(None, h=image_data)
+                            # Vérifier le format de l'image avec notre fonction
+                            img_type = detect_image_type(image_data)
                             if img_type is None:
                                 log(f"    WARNING: Invalid image format, skipping")
                                 continue
@@ -106,7 +124,7 @@ def download_images_from_urls(urls, output_path):
                             log(f"    Image type: {img_type}")
 
                             # Sauvegarder temporairement
-                            with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_image_file:
+                            with tempfile.NamedTemporaryFile(delete=False, suffix='.tmp') as temp_image_file:
                                 temp_image_file.write(image_data)
                                 temp_path = temp_image_file.name
 
@@ -115,9 +133,20 @@ def download_images_from_urls(urls, output_path):
                             try:
                                 # Convertir en JPEG
                                 image = Image.open(temp_path)
-                                jpeg_path = temp_path.replace('.png', '.jpg')
-                                image = image.convert('RGB')
-                                image.save(jpeg_path, 'JPEG')
+                                jpeg_path = temp_path.replace('.tmp', '.jpg')
+
+                                # Convertir en RGB (nécessaire pour JPEG)
+                                if image.mode in ('RGBA', 'LA', 'P'):
+                                    # Créer un fond blanc pour les images avec transparence
+                                    background = Image.new('RGB', image.size, (255, 255, 255))
+                                    if image.mode == 'P':
+                                        image = image.convert('RGBA')
+                                    background.paste(image, mask=image.split()[-1] if image.mode in ('RGBA', 'LA') else None)
+                                    image = background
+                                elif image.mode != 'RGB':
+                                    image = image.convert('RGB')
+
+                                image.save(jpeg_path, 'JPEG', quality=85)
                                 log(f"    Converted to JPEG: {jpeg_path}")
 
                                 # Ajouter au PDF
