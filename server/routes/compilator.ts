@@ -47,7 +47,7 @@ router.post('/compile', async (req, res) => {
         python.on('close', (code) => {
             if (code !== 0) {
                 console.error(`Python script failed with exit code ${code}`);
-                return res.status(500).json({ success: false, error: 'Python script failed' });
+                return res.status(500).json({ success: false, error: 'Python script execution failed' });
             }
 
             res.download(outputPdfPath, 'result.pdf', (err) => {
