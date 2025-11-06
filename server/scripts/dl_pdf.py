@@ -8,8 +8,8 @@ from PIL import Image
 from fpdf import FPDF
 from bs4 import BeautifulSoup
 import cloudscraper
+from urllib.parse import urljoin
 
-# Configuration du logging vers stderr pour être capturé par Node.js
 def log(message):
     """Log vers stderr pour déboguer"""
     print(f"[DEBUG] {message}", file=sys.stderr, flush=True)
@@ -26,7 +26,6 @@ def detect_image_type(image_data):
         return 'webp'
     elif image_data.startswith(b'BM'):
         return 'bmp'
-    # Essayer avec PIL comme fallback
     try:
         img = Image.open(io.BytesIO(image_data))
         return img.format.lower() if img.format else None
@@ -63,6 +62,11 @@ def download_images_from_urls(urls, output_path):
         log(f"ERROR: Failed to initialize cloudscraper: {e}")
         raise
 
+    for i, url in enumerate(urls):
+        if "https://scanfresh.onrender.com" in url:
+            urls[i] = url.replace("https://scanfresh.onrender.com", "http://localhost:10000")
+            log(f"Replaced public URL with localhost: {urls[i]}")
+
     total_images_added = 0
 
     for idx, url in enumerate(urls):
@@ -92,13 +96,18 @@ def download_images_from_urls(urls, output_path):
                     log(f"WARNING: No images found on {url}")
                     continue
 
+                # Remplacer les images publiques par localhost
+                for j, img_url in enumerate(images):
+                    if img_url.startswith("https://scanfresh.onrender.com"):
+                        images[j] = img_url.replace("https://scanfresh.onrender.com", "http://localhost:10000")
+                        log(f"Image URL replaced with localhost: {images[j]}")
+
                 for img_idx, image_url in enumerate(images):
                     try:
                         # Gérer les URLs relatives
                         if image_url.startswith('//'):
                             image_url = 'https:' + image_url
                         elif image_url.startswith('/'):
-                            from urllib.parse import urljoin
                             image_url = urljoin(url, image_url)
 
                         log(f"  [{img_idx+1}/{len(images)}] Downloading image: {image_url}")
@@ -115,7 +124,7 @@ def download_images_from_urls(urls, output_path):
                             image_data = image_response.content
                             log(f"    Downloaded {len(image_data)} bytes")
 
-                            # Vérifier le format de l'image avec notre fonction
+                            # Vérifier le format de l'image
                             img_type = detect_image_type(image_data)
                             if img_type is None:
                                 log(f"    WARNING: Invalid image format, skipping")
@@ -135,9 +144,7 @@ def download_images_from_urls(urls, output_path):
                                 image = Image.open(temp_path)
                                 jpeg_path = temp_path.replace('.tmp', '.jpg')
 
-                                # Convertir en RGB (nécessaire pour JPEG)
                                 if image.mode in ('RGBA', 'LA', 'P'):
-                                    # Créer un fond blanc pour les images avec transparence
                                     background = Image.new('RGB', image.size, (255, 255, 255))
                                     if image.mode == 'P':
                                         image = image.convert('RGBA')
@@ -193,7 +200,6 @@ def download_images_from_urls(urls, output_path):
         pdf.output(output_path)
         log(f"PDF saved successfully")
 
-        # Vérifier que le fichier existe et a une taille > 0
         if os.path.exists(output_path):
             file_size = os.path.getsize(output_path)
             log(f"PDF file size: {file_size} bytes")
