@@ -34,7 +34,7 @@ Scanfresh est une application web qui permet de gérer votre bibliothèque numé
 - MongoDB (local ou via Docker)
 - npm ou yarn
 
-### Démarrer le serveur
+## Démarrer le serveur
 
 ```bash
 cd server
@@ -43,7 +43,7 @@ npm run dev
 
 Le serveur sera accessible sur `http://localhost:3001`
 
-#### Démarrer le client (dans un autre terminal)
+## Démarrer le client (dans un autre terminal)
 
 ```bash
 cd client
@@ -51,26 +51,6 @@ npm run dev
 ```
 
 Le client sera accessible sur `http://localhost:5173` (ou un autre port si 5173 est occupé)
-
-### Production
-
-#### 1. Build du client
-
-```bash
-cd client
-npm run build
-```
-
-Le build sera automatiquement placé dans `server/public`.
-
-#### 2. Démarrer le serveur
-
-```bash
-cd server
-npm start
-```
-
-Le serveur servira à la fois l'API et l'application React compilée.
 
 ## Utilisation
 
@@ -81,27 +61,7 @@ Le serveur servira à la fois l'API et l'application React compilée.
 5. Cliquez sur "Submit" pour télécharger directement le PDF, ou sur "Save PDF" pour l'ajouter à votre bibliothèque
 6. Accédez à la page "Downloads" pour voir, télécharger ou supprimer les mangas de votre bibliothèque
 
-## Structure du projet
-
-```
-scanfresh/
-├── client/          # Application React frontend
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   └── styles/
-│   └── package.json
-├── server/          # Serveur Express backend
-│   ├── routes/      # Routes API
-│   ├── scripts/     # Scripts Python
-│   │   └── dl_pdf.py
-│   └── package.json
-└── docker-compose.yml
-```
-
 ## Notes
 
 - Il est recommandé de ne pas compiler plus de 4 URLs à la fois pour éviter les problèmes de performance
 - Les PDFs sont stockés dans MongoDB GridFS
-- Le script Python utilise cloudscraper pour contourner les protections anti-bot
-
