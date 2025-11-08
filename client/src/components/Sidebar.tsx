@@ -16,14 +16,8 @@ function Sidebar({ isOpen, onToggle }: SidebarProps) {
             </span>
             <nav>
                 <ul>
-                    <li className="menu">
-                        <Link to="/">
-                            <FontAwesomeIcon className="menu-icon" icon="home" />
-                            <span className="menu-label-wrapper">{isOpen && "Home"}</span>
-                        </Link>
-                    </li>
                     <li>
-                        <Link to="/compilator">
+                        <Link to="/">
                             <FontAwesomeIcon className="menu-icon" icon="upload"/>
                             <span className="menu-label-wrapper">{isOpen && "Compilator"}</span>
                         </Link>

@@ -15,6 +15,51 @@ const uri = 'mongodb+srv://fosonaf:passwd001@scanfresh-mongo.3igqvta.mongodb.net
 const client = new MongoClient(uri);
 const dbName = 'scanfresh';
 
+// URL validation and sanitization
+const validateAndSanitizeUrls = (urlsInput: string): { valid: boolean; urls: string[]; error: string } => {
+    if (!urlsInput || typeof urlsInput !== 'string') {
+        return { valid: false, urls: [], error: 'Invalid URLs' };
+    }
+
+    const lines = urlsInput.split('\n')
+        .map((u: string) => u.trim())
+        .filter((u: string) => u.length > 0);
+
+    // Maximum 4 URLs
+    if (lines.length > 4) {
+        return { valid: false, urls: [], error: 'Maximum 4 URLs allowed' };
+    }
+
+    if (lines.length === 0) {
+        return { valid: false, urls: [], error: 'No URLs provided' };
+    }
+
+    const validUrls: string[] = [];
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        
+        // Check that there are no spaces or additional characters
+        if (line.includes(' ') || line !== line.trim()) {
+            return { valid: false, urls: [], error: `Line ${i + 1}: only one URL per line` };
+        }
+
+        // Validate URL
+        try {
+            const url = new URL(line);
+            // Check that it's HTTP or HTTPS only
+            if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+                return { valid: false, urls: [], error: `Line ${i + 1}: only HTTP/HTTPS URLs are allowed` };
+            }
+            // Add validated URL (use href to normalize)
+            validUrls.push(url.href);
+        } catch (e) {
+            return { valid: false, urls: [], error: `Line ${i + 1}: invalid URL` };
+        }
+    }
+
+    return { valid: true, urls: validUrls, error: '' };
+};
+
 router.post('/compile', async (req, res) => {
     const { urls } = req.body;
 
@@ -22,11 +67,14 @@ router.post('/compile', async (req, res) => {
         return res.status(400).json({ success: false, error: 'No URLs provided' });
     }
 
+    // Valider et sanitiser les URLs
+    const validation = validateAndSanitizeUrls(urls);
+    if (!validation.valid) {
+        return res.status(400).json({ success: false, error: validation.error });
+    }
+
     try {
-        const urlsList: string[] = urls
-            .split('\n')
-            .map((u: string) => u.trim())
-            .filter(Boolean);
+        const urlsList = validation.urls;
 
         console.log(`[COMPILE] Processing ${urlsList.length} URLs`);
 
@@ -130,18 +178,33 @@ router.post('/save', async (req, res) => {
         return res.status(400).json({ success: false, error: 'No URLs provided' });
     }
 
-    // Réponse immédiate
+    // Valider et sanitiser les URLs (pour save, on accepte une seule URL à la fois)
+    const validation = validateAndSanitizeUrls(urls);
+    if (!validation.valid) {
+        return res.status(400).json({ success: false, error: validation.error });
+    }
+
+    // For save, we only take the first URL
+    if (validation.urls.length === 0) {
+        return res.status(400).json({ success: false, error: 'No valid URL' });
+    }
+
+    // Sanitize title (limit length and remove dangerous characters)
+    const sanitizedTitle = typeof title === 'string' 
+        ? title.trim().slice(0, 200).replace(/[<>:"/\\|?*]/g, '') 
+        : 'Untitled';
+
+    // Immediate response
     res.status(202).json({ success: true, message: 'Save started in background' });
 
-    // Traitement en arrière-plan
+    // Background processing
     (async () => {
         try {
-            const urlsList: string[] = urls
-                .split('\n')
-                .map((u: string) => u.trim())
-                .filter(Boolean);
+            // Use only the first validated URL
+            const urlToProcess = validation.urls[0];
+            const urlsList = [urlToProcess];
 
-            console.log(`[SAVE] Processing ${urlsList.length} URLs in background`);
+            console.log(`[SAVE] Processing 1 URL in background`);
 
             const tempDir = os.tmpdir();
             const outputPdfPath = path.join(tempDir, `result_${Date.now()}.pdf`);
@@ -196,7 +259,7 @@ router.post('/save', async (req, res) => {
                     const db = client.db(dbName);
                     const bucket = new GridFSBucket(db, { bucketName: 'pdfs' });
 
-                    const uploadStream = bucket.openUploadStream(title?.trim() || 'Untitled', {
+                    const uploadStream = bucket.openUploadStream(sanitizedTitle || 'Untitled', {
                         metadata: { urls: urlsList, createdAt: new Date() }
                     });
 

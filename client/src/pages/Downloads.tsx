@@ -61,7 +61,7 @@ function Downloads() {
     }
 
     const handleEdit = (id: string) => {
-        console.log(`Modifier PDF ${id}`)
+        console.log(`Edit PDF ${id}`)
     }
 
     const handleDelete = async (id: string) => {
